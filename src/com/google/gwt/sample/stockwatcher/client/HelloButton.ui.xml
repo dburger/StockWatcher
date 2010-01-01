@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+  <ui:style>
+    .mybutton {background-color: orange}
+  </ui:style>
+
+  <!-- Button has setStyleName, others might have setClass -->
+  <g:Button ui:field='button' styleName='{style.mybutton}'>
+    Button
+  </g:Button>
+
+</ui:UiBinder>

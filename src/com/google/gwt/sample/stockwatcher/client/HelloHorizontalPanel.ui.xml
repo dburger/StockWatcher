@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+  <g:HorizontalPanel>
+    <g:Label ui:field='firstLabel'>Keep your ducks</g:Label>
+    <g:Label ui:field='secondLabel'>in a row</g:Label>
+  </g:HorizontalPanel>
+
+</ui:UiBinder>

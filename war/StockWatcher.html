@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- The HTML 4.01 Transitional DOCTYPE declaration-->
+<!-- above set at the top of the file will set     -->
+<!-- the browser's rendering engine into           -->
+<!-- "Quirks Mode". Replacing this declaration     -->
+<!-- with a "Standards Mode" doctype is supported, -->
+<!-- but may lead to some differences in layout.   -->
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="StockWatcher.css">
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>StockWatcher</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript" src="stockwatcher/stockwatcher.nocache.js"></script>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body>
+
+    <img src="images/GoogleCode.png" />
+
+    <h1>StockWatcher</h1>
+    <div id="stockList"></div>
+
+    <hr/>
+
+    <h1>UiBinder with only HTML</h1>
+    <ul>
+        <li>Note that this is not a widget, so added in StockWatcher.java with DOM techniques</li>
+        <li>HelloWorld.ui.xml and HelloWorld.java</li>
+    </ul>
+    <div id="uiBinder1"></div>
+
+    <hr/>
+
+    <h1>UiBinder with widgets</h1>
+    <ul>
+        <li>Note that this is a widget, so added in StockWatcher.java with typical RootPanel techniques</li>
+        <li>Note that at the top level this one uses an HTMLPanel to mix HTML and Widgets</li>
+        <li>HelloWidgetWorld.ui.xml and HelloWidgetWorld.java</li>
+    </ul>
+    <div id="uiBinder2"></div>
+
+    <hr/>
+
+    <h1>UiBinder with a HorizontalPanel in it</h1>
+    <ul>
+        <li>Note that anything that implements HasWidgets can have other panels inside of it</li>
+        <li>more interesting would be to do the entire page layout with a DockLayoutPanel</li>
+        <li>HelloHorizontalPanel.ui.xml and HelloHorizontalPanel.java</li>
+    </ul>
+    <div id="uiBinder3"></div>
+
+    <hr/>
+
+    <h1>UiBinder with @UiHandler Annotation</h1>
+    <ul>
+        <li>Note that this one demonstrates setting the style from within the HelloButton.ui.xml file making a local css namespace</li>
+        <li>Note that the css could also be a src reference to a .cas file</li>
+        <li>HelloButton.ui.xml and HelloButton.java</li>
+    </ul>
+    <div id="uiBinder4"></div>
+
+    <hr/>
+
+    <h1>UiBinder with a template including a widget requiring constructor args</h1>
+    <ul>
+        <li>HelloConstructorArgs.ui.xml includes the HelloWidgetWorld widget above in its template</li>
+        <li>HelloWidgetWorld requires constructor args</li>
+        <li>There are three ways to do this, @UiFactory, @UiConstructor, and @UiField(provided=true)</li>
+        <li>This one demos the @UiFactory technique</li>
+        <li>HelloConstructorArgs.ui.xml and HelloConstructorArgs.java</li>
+    </ul>
+    <div id="uiBinder5"></div>
+
+    <hr/>
+
+    <h1>Programmatic access to styles - not demoed</h1>
+
+    <hr/>
+
+    <h1>Using external resources - not demoed</h1>
+
+
+
+    <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+  </body>
+</html>
