@@ -1,13 +1,20 @@
 package com.google.gwt.sample.stockwatcher.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Random;
@@ -24,9 +31,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 public class StockWatcher implements EntryPoint {
 
+  private static final String JSON_URL = GWT.getModuleBaseURL() + "jsonStockPrices?q=";
   private static final int REFRESH_INTERVAL = 5000; // ms
   private VerticalPanel mainPanel = new VerticalPanel();
   private FlexTable stocksFlexTable = new FlexTable();
@@ -37,6 +46,9 @@ public class StockWatcher implements EntryPoint {
   private ArrayList<String> stocks = new ArrayList<String>();
   private StockPriceServiceAsync stockPriceSvc = GWT.create(StockPriceService.class);
   private Label errorMsgLabel = new Label();
+  private VerticalPanel fetchJsonPanel = new VerticalPanel();
+  private Button fetchJsonButton = new Button("Fetch JSON");
+  private Label fetchJsonResultsLabel = new Label("JSON results");
 
   /**
    * Entry point method.
@@ -79,28 +91,28 @@ public class StockWatcher implements EntryPoint {
 
     // Setup timer to refresh list automatically.
     Timer refreshTimer = new Timer() {
-      @Override
-      public void run() {
-        refreshWatchList();
-      }
-    };
+	@Override
+	  public void run() {
+	  refreshWatchList();
+	}
+      };
     refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
 
     // Listen for mouse events on the Add button.
     addStockButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        addStock();
-      }
-    });
+	public void onClick(ClickEvent event) {
+	  addStock();
+	}
+      });
 
     // Listen for keyboard events in the input box.
     newSymbolTextBox.addKeyPressHandler(new KeyPressHandler() {
-      public void onKeyPress(KeyPressEvent event) {
-        if (event.getCharCode() == KeyCodes.KEY_ENTER) {
-          addStock();
-        }
-      }
-    });
+	public void onKeyPress(KeyPressEvent event) {
+	  if (event.getCharCode() == KeyCodes.KEY_ENTER) {
+	    addStock();
+	  }
+	}
+      });
 
 
     HelloWorld helloWorld = new HelloWorld();
@@ -111,24 +123,32 @@ public class StockWatcher implements EntryPoint {
     // helloWorld is not a widget and so cannot be added directly like this:
     // RootPanel.get("uiBinder1").add(helloWorld);
     Document.get().getElementById("uiBinder1")
-	.appendChild(helloWorld.getElement());
+      .appendChild(helloWorld.getElement());
 
     HelloWidgetWorld helloWidgetWorld = new HelloWidgetWorld("able", "baker",
-        "charlie");
+							     "charlie");
     // Document.get().getBody().appendChild(helloWidgetWorld.getElement());
     RootPanel.get("uiBinder2").add(helloWidgetWorld);
 
     HelloHorizontalPanel helloHorizontalPanel
-	= new HelloHorizontalPanel("first", "second");
+      = new HelloHorizontalPanel("first", "second");
     RootPanel.get("uiBinder3").add(helloHorizontalPanel);
 
     HelloButton helloButton = new HelloButton();
     RootPanel.get("uiBinder4").add(helloButton);
 
     HelloConstructorArgs helloConstructorArgs
-	= new HelloConstructorArgs("one", "two", "three", "four", "five", "six");
+      = new HelloConstructorArgs("one", "two", "three", "four", "five", "six");
     RootPanel.get("uiBinder5").add(helloConstructorArgs);
 
+    fetchJsonButton.addClickHandler(new ClickHandler() {
+	public void onClick(ClickEvent event) {
+	  fetchJsonStockData();
+	}
+      });
+    fetchJsonPanel.add(fetchJsonButton);
+    fetchJsonPanel.add(fetchJsonResultsLabel);
+    RootPanel.get("json_demo").add(fetchJsonPanel);
   }
 
   /**
@@ -166,12 +186,12 @@ public class StockWatcher implements EntryPoint {
     Button removeStockButton = new Button("x");
     removeStockButton.addStyleDependentName("remove");
     removeStockButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        int removedIndex = stocks.indexOf(symbol);
-        stocks.remove(removedIndex);
-        stocksFlexTable.removeRow(removedIndex + 1);
-      }
-    });
+	public void onClick(ClickEvent event) {
+	  int removedIndex = stocks.indexOf(symbol);
+	  stocks.remove(removedIndex);
+	  stocksFlexTable.removeRow(removedIndex + 1);
+	}
+      });
     stocksFlexTable.setWidget(row, 3, removeStockButton);
 
 
@@ -222,7 +242,7 @@ public class StockWatcher implements EntryPoint {
 
     // Display timestamp showing last refresh.
     lastUpdatedLabel.setText("Last update : "
-        + DateTimeFormat.getMediumDateTimeFormat().format(new Date()));
+			     + DateTimeFormat.getMediumDateTimeFormat().format(new Date()));
 
     // Clear any errors.
     errorMsgLabel.setVisible(false);
@@ -243,7 +263,7 @@ public class StockWatcher implements EntryPoint {
 
     // Format the data in the Price and Change fields.
     String priceText = NumberFormat.getFormat("#,##0.00").format(
-        price.getPrice());
+								 price.getPrice());
     NumberFormat changeFormat = NumberFormat.getFormat("+#,##0.00;-#,##0.00");
     String changeText = changeFormat.format(price.getChange());
     String changePercentText = changeFormat.format(price.getChangePercent());
@@ -263,6 +283,62 @@ public class StockWatcher implements EntryPoint {
     }
 
     changeWidget.setStyleName(changeStyleName);
+  }
+
+  /**
+   * Convert the string of JSON into JavaScript object.
+   */
+  private final native JsArray<StockData> asArrayOfStockData(String json) /*-{
+									    return eval(json);
+									    }-*/;
+
+  private void fetchJsonStockData() {
+    if (stocks.size() == 0) {
+      displayJsonError("Need to add some stocks above before trying this");
+      return;
+    }
+
+    String url = JSON_URL;
+
+    for (Iterator i = stocks.iterator(); i.hasNext();) {
+      url += i.next();
+      if (i.hasNext()) url += "+";
+    }
+
+    url = URL.encode(url);
+
+    // Send request to server and catch any errors.
+    RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+
+    try {
+      Request request = builder.sendRequest(null, new RequestCallback() {
+	  public void onError(Request request, Throwable exception) {
+	    displayJsonError("Couldn't retrieve JSON");
+	  }
+
+	  public void onResponseReceived(Request request, Response response) {
+	    if (200 == response.getStatusCode()) {
+              JsArray<StockData> stockData = asArrayOfStockData(response.getText());
+	      String msg = "";
+	      for (int i = 0; i < stockData.length(); i++) {
+		StockData data = stockData.get(i);
+		msg += data.summary() + "|";
+	      }
+	      fetchJsonResultsLabel.setText(msg);
+	    } else {
+	      displayJsonError("Couldn't retrieve JSON (" + response.getStatusText()
+			   + ")");
+	    }
+	  }
+	});
+    } catch (RequestException e) {
+      displayJsonError("Couldn't retrieve JSON");
+    }
+
+  }
+
+  private void displayJsonError(String error) {
+    fetchJsonResultsLabel.setText("ERROR: " + error);
   }
 
 }
