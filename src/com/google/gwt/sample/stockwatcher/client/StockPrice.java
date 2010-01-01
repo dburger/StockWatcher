@@ -1,6 +1,8 @@
 package com.google.gwt.sample.stockwatcher.client;
 
-public class StockPrice {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public class StockPrice implements IsSerializable {
 
   private String symbol;
   private double price;
