@@ -1,6 +1,7 @@
 package com.google.gwt.sample.stockwatcher.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Request;
@@ -37,6 +38,15 @@ public class StockWatcher implements EntryPoint {
 
   private static final String JSON_URL = GWT.getModuleBaseURL() + "jsonStockPrices?q=";
   private static final int REFRESH_INTERVAL = 5000; // ms
+  private static final String JSONP_URL =
+      "http://spreadsheets.google.com/feeds/"
+      + "list/"
+      + "o01639138815242963973.2576643066438841202"
+      + "/"
+      + "od6"
+      + "/public/values"
+      + "?alt=json-in-script&callback=";
+  private int jsonpRequestId = 0;
   private VerticalPanel mainPanel = new VerticalPanel();
   private FlexTable stocksFlexTable = new FlexTable();
   private HorizontalPanel addPanel = new HorizontalPanel();
@@ -49,6 +59,9 @@ public class StockWatcher implements EntryPoint {
   private VerticalPanel fetchJsonPanel = new VerticalPanel();
   private Button fetchJsonButton = new Button("Fetch JSON");
   private Label fetchJsonResultsLabel = new Label("JSON results");
+  private VerticalPanel fetchJsonpPanel = new VerticalPanel();
+  private Button fetchJsonpButton = new Button("Fetch JSONP");
+  private Label fetchJsonpResultsLabel = new Label("JSON results");
 
   /**
    * Entry point method.
@@ -114,7 +127,6 @@ public class StockWatcher implements EntryPoint {
 	}
       });
 
-
     HelloWorld helloWorld = new HelloWorld();
     String name = "Bob Dylan";
     helloWorld.setName(name);
@@ -149,6 +161,15 @@ public class StockWatcher implements EntryPoint {
     fetchJsonPanel.add(fetchJsonButton);
     fetchJsonPanel.add(fetchJsonResultsLabel);
     RootPanel.get("json_demo").add(fetchJsonPanel);
+
+    fetchJsonpButton.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          fetchJsonpStockData(jsonpRequestId, JSONP_URL, StockWatcher.this);
+        }
+    });
+    fetchJsonpPanel.add(fetchJsonpButton);
+    fetchJsonpPanel.add(fetchJsonpResultsLabel);
+    RootPanel.get("jsonp_demo").add(fetchJsonpPanel);
   }
 
   /**
@@ -339,6 +360,57 @@ public class StockWatcher implements EntryPoint {
 
   private void displayJsonError(String error) {
     fetchJsonResultsLabel.setText("ERROR: " + error);
+  }
+
+  /**
+   * Make call to remote server.
+   */
+  public native static void fetchJsonpStockData(int requestId, String url,
+      StockWatcher handler) /*-{
+    var callback = "callback" + requestId;
+
+    // [1] Create a script element.
+    var script = document.createElement("script");
+    script.setAttribute("src", url+callback);
+    script.setAttribute("type", "text/javascript");
+
+    // [2] Define the callback function on the window object.
+    window[callback] = function(jsonObj) {
+      // [3]
+      handler.@com.google.gwt.sample.stockwatcher.client.StockWatcher::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(jsonObj);
+      window[callback + "done"] = true;
+    }
+
+    // [4] JSON download has 1-second timeout.
+    setTimeout(function() {
+      if (!window[callback + "done"]) {
+        handler.@com.google.gwt.sample.stockwatcher.client.StockWatcher::handleJsonResponse(Lcom/google/gwt/core/client/JavaScriptObject;)(null);
+      }
+
+      // [5] Cleanup. Remove script and callback elements.
+      document.body.removeChild(script);
+      delete window[callback];
+      delete window[callback + "done"];
+    }, 1000);
+
+    // [6] Attach the script element to the document body.
+    document.body.appendChild(script);
+  }-*/;
+
+  /**
+   * Handle the response to the request for stock data from a remote server.
+   */
+  public void handleJsonResponse(JavaScriptObject jso) {
+    if (jso == null) {
+      displayJsonpError("Couldn't retrieve JSON");
+      return;
+    }
+
+    fetchJsonpResultsLabel.setText(jso.toString());
+  }
+
+  private void displayJsonpError(String error) {
+    fetchJsonpResultsLabel.setText("ERROR: " + error);
   }
 
 }
